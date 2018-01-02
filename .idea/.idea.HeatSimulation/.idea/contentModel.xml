@@ -5,8 +5,10 @@
     <e p="D:\My Documents\RiderProjects\HeatSimulation" t="IncludeFlat">
       <e p="HeatSimulation" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
+        <e p="GridCell.cs" t="Include" />
         <e p="HeatSimulation.csproj" t="IncludeRecursive" />
         <e p="HeatSimulator.cs" t="Include" />
+        <e p="MainWindow.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />
         <e p="packages.config" t="Include" />
         <e p="Program.cs" t="Include" />

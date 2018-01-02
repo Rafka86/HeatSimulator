@@ -6,7 +6,7 @@ namespace HeatSimulation {
   public class HeatSimulator {
     private const double d = 1.0;
 
-    private int divNum = 10;
+    private int divNum = 100;
     private double deltaT = 1 / 60.0;
 
     private int size, lda, bl;
@@ -17,6 +17,7 @@ namespace HeatSimulation {
     public HeatSimulator() {
       UpdateParameter();
       b = new double[size];
+      for (var i = 0; i < b.Length; i++) b[i] = 1.0;
     }
 
     private void GenerateMatrix() {

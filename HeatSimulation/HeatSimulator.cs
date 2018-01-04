@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SharpMKL;
 using static SharpMKL.Lapack;
 
@@ -16,8 +17,10 @@ namespace HeatSimulation {
     private double h, c;
     private double[] a;
     private double[] b;
+    private readonly List<int> alwaysHeatList;
     
     public HeatSimulator() {
+      alwaysHeatList = new List<int>();
       UpdateParameter();
       b = new double[size];
       for (var i = 0; i < b.Length; i++) b[i] = heat;
@@ -30,6 +33,7 @@ namespace HeatSimulation {
       h = d / (divNum - 1);
       c = DeltaT / (h * h);
       GenerateMatrix();
+      alwaysHeatList.Clear();
     }
     
     private void GenerateMatrix() {
@@ -73,8 +77,22 @@ namespace HeatSimulation {
     public double[] State => b;
     public double MaxValue => heat;
 
-    public void DoStep() => pbtrs(LapackLayout.ColumnMajor, LapackUpLo.Lower, size, bl, 1, a, lda, b, size);
-
+    public void DoStep() {
+      foreach (var target in alwaysHeatList) b[target] += heat / DeltaT;
+      pbtrs(LapackLayout.ColumnMajor, LapackUpLo.Lower, size, bl, 1, a, lda, b, size);
+    }
+    public void PinnedCell(int target) {
+      if (alwaysHeatList.Contains(target)) alwaysHeatList.Remove(target);
+      else alwaysHeatList.Add(target);
+    }
+    public void ClearPinnedList() => alwaysHeatList.Clear();
+    public void UnPinnedLastCell() {
+      if (alwaysHeatList.Count > 0) alwaysHeatList.RemoveAt(alwaysHeatList.Count - 1);
+    }
+    public void AllHeat() {
+      for (var i = 0; i < b.Length; i++) b[i] += heat;
+    }
+    
     public void PrintState()  {
       int Index(int i, int j) => i * divNum + j;
       

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
@@ -40,9 +39,8 @@ namespace HeatSimulation {
     private readonly SolidColorBrush sColorBrush;
 
     private readonly HeatSimulator simulator;
-    private readonly GridCell[,] cells;
+    private GridCell[,] cells;
     private readonly Stopwatch stopWatch;
-    private readonly List<GridCell> pinCells;
     private bool printDebug;
     private string debugInfo = "";
 
@@ -93,7 +91,6 @@ namespace HeatSimulation {
       for (var i = 0; i < simulator.DivNum; i++)
         for (var j = 0; j < simulator.DivNum; j++)
           cells[i, j] = new GridCell(factory2d, Width, Height, i, j, simulator.DivNum, simulator.State);
-      pinCells = new List<GridCell>();
     }
 
     ~MainWindow() => Dispose();
@@ -125,7 +122,6 @@ namespace HeatSimulation {
 
     private void Draw() {
       stopWatch.Restart();
-      foreach (var cell in pinCells) cell.Heating(simulator.MaxValue / simulator.DeltaT);
       simulator.DoStep();
       
       renderTarget2d.BeginDraw();
@@ -155,15 +151,25 @@ namespace HeatSimulation {
       var divSize = Width / (float)simulator.DivNum;
       var x = (int) (e.X / divSize);
       var y = (int) (simulator.DivNum - e.Y / divSize - 1);
-      if (pinCells.Contains(cells[y, x])) pinCells.Remove(cells[y, x]);
-      else pinCells.Add(cells[y, x]);
+      simulator.PinnedCell(y * simulator.DivNum + x);
     }
 
     private void MainWindow_KeyPress(object sender, KeyPressEventArgs e) {
       switch (e.KeyChar) {
-        case 'c': pinCells.Clear(); break;
-        case 'z': if (pinCells.Count > 0) pinCells.RemoveAt(pinCells.Count - 1); break;
+        case 'c': simulator.ClearPinnedList(); break;
+        case 'z': simulator.UnPinnedLastCell(); break;
         case 'p': printDebug = !printDebug; break;
+        case 'a': simulator.AllHeat(); break;
+        case 'n': simulator.NextDim(); RemakeCells(); break;
+        case 'b': simulator.PrevDim(); RemakeCells(); break;
+      }
+
+      void RemakeCells() {
+        foreach(var cell in cells) cell.Dispose();
+        cells = new GridCell[simulator.DivNum, simulator.DivNum];
+        for (var i = 0; i < simulator.DivNum; i++)
+          for (var j = 0; j < simulator.DivNum; j++)
+            cells[i, j] = new GridCell(factory2d, Width, Height, i, j, simulator.DivNum, simulator.State);
       }
     }
   }

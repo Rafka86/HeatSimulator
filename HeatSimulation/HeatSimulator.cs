@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SharpMKL;
 using static SharpMKL.Lapack;
 
@@ -91,14 +90,6 @@ namespace HeatSimulation {
     }
     public void AllHeat() {
       for (var i = 0; i < b.Length; i++) b[i] += heat;
-    }
-    
-    public void PrintState()  {
-      int Index(int i, int j) => i * divNum + j;
-      
-      for (var i = 0; i < divNum; i++)
-        for (var j = 0; j < divNum; j++)
-          Console.Write($"{b[Index(i, j)]}{(j == divNum - 1 ? "\n" : " ")}");
     }
   }
 }

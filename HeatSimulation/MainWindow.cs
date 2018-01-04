@@ -98,7 +98,6 @@ namespace HeatSimulation {
     private void ReleaseResources() {
       ReleaseD2DObjects();
       ReleaseRenderingObjects();
-      Console.WriteLine("Call Release Method.");
 
       void ReleaseD2DObjects() {
         renderTarget2d?.Dispose();

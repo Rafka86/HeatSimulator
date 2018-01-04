@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
@@ -41,12 +42,17 @@ namespace HeatSimulation {
     private readonly HeatSimulator simulator;
     private readonly GridCell[,] cells;
     private readonly Stopwatch stopWatch;
+    private readonly List<GridCell> pinCells;
+    private bool printDebug;
     private string debugInfo = "";
 
     public MainWindow() : base("Heat Simulator") {
       ClientSize = new Size(400, 400);
       MouseClick += MainWindow_MouseClick;
       MouseMove += MainWindow_MouseMove;
+      MaximizeBox = false;
+      KeyPreview = true;
+      KeyPress += MainWindow_KeyPress;
       
       var desc            = new SwapChainDescription {
         BufferCount       = 1,
@@ -87,6 +93,7 @@ namespace HeatSimulation {
       for (var i = 0; i < simulator.DivNum; i++)
         for (var j = 0; j < simulator.DivNum; j++)
           cells[i, j] = new GridCell(factory2d, Width, Height, i, j, simulator.DivNum, simulator.State);
+      pinCells = new List<GridCell>();
     }
 
     ~MainWindow() => Dispose();
@@ -118,6 +125,7 @@ namespace HeatSimulation {
 
     private void Draw() {
       stopWatch.Restart();
+      foreach (var cell in pinCells) cell.Heating(simulator.MaxValue / simulator.DeltaT);
       simulator.DoStep();
       
       renderTarget2d.BeginDraw();
@@ -133,23 +141,30 @@ namespace HeatSimulation {
 
       if (stopWatch.ElapsedMilliseconds * 1e-3 < simulator.DeltaT)
         Thread.Sleep((int) ((simulator.DeltaT - stopWatch.ElapsedMilliseconds * 1e-3) * 1000));
-      debugInfo = "";
+      debugInfo = printDebug ? $"FPS:{1.0 / (stopWatch.ElapsedMilliseconds * 1e-3):0.0}\n" : "";
     }
 
     private void MainWindow_MouseMove(object sender, MouseEventArgs e) {
       var divSize = Width / (float)simulator.DivNum;
-      var x = e.X / divSize;
-      var y = simulator.DivNum - e.Y / divSize - 1;
-      cells[(int)y, (int)x].Heating(simulator.MaxValue * 100);
-      debugInfo += $"Move.X:{e.X}Y:{e.Y}\n";
+      var x = (int) (e.X / divSize);
+      var y = (int) (simulator.DivNum - e.Y / divSize - 1);
+      cells[y, x].Heating(simulator.MaxValue * 100);
     }
 
     private void MainWindow_MouseClick(object sender, MouseEventArgs e) {
       var divSize = Width / (float)simulator.DivNum;
-      var x = e.X / divSize;
-      var y = simulator.DivNum - e.Y / divSize - 1;
-      cells[(int)y, (int)x].Heating(simulator.MaxValue * 1000);
-      debugInfo += $"Click.{x} {y}\n";
+      var x = (int) (e.X / divSize);
+      var y = (int) (simulator.DivNum - e.Y / divSize - 1);
+      if (pinCells.Contains(cells[y, x])) pinCells.Remove(cells[y, x]);
+      else pinCells.Add(cells[y, x]);
+    }
+
+    private void MainWindow_KeyPress(object sender, KeyPressEventArgs e) {
+      switch (e.KeyChar) {
+        case 'c': pinCells.Clear(); break;
+        case 'z': if (pinCells.Count > 0) pinCells.RemoveAt(pinCells.Count - 1); break;
+        case 'p': printDebug = !printDebug; break;
+      }
     }
   }
 }

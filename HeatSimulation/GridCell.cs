@@ -30,7 +30,7 @@ namespace HeatSimulation {
 
       (double r, double g, double b) GenColor(double value) {
         var divVal = maxValue / 4.0;
-        var blendVal = -Cos(4 * PI * value) / 2.0 + 0.5;
+        var blendVal = -Cos(PI * value / divVal) / 2.0 + 0.5;
         double r, g, b;
              if (value < divVal * 0) {r = 0.0;      g = 0.0;      b = 1.0;     }
         else if (value < divVal * 1) {r = 0.0;      g = blendVal; b = 1.0;     }

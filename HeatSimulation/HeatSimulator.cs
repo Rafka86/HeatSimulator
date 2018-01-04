@@ -6,9 +6,11 @@ namespace HeatSimulation {
   public class HeatSimulator {
     private const double d = 1.0;
     private const double heat = 4.0;
+    private static readonly int[] divNumList = {5, 10, 50, 100, 150, 200};
 
-    private int divNum = 150;
-    private double deltaT = 1 / 60.0;
+    private int useDivNumI = 3;
+    private int divNum = 100;
+    public double DeltaT { get; } = 1 / 60.0;
 
     private int size, lda, bl;
     private double h, c;
@@ -26,7 +28,7 @@ namespace HeatSimulation {
       bl = divNum;
       lda = bl + 1;
       h = d / (divNum - 1);
-      c = deltaT / (h * h);
+      c = DeltaT / (h * h);
       GenerateMatrix();
     }
     
@@ -50,22 +52,24 @@ namespace HeatSimulation {
 
       pbtrf(LapackLayout.ColumnMajor, LapackUpLo.Lower, size, bl, a, lda);
     }
-    
+
+    public void NextDim() {
+      useDivNumI = (useDivNumI + 1) % divNumList.Length;
+      DivNum = divNumList[useDivNumI];
+    }
+    public void PrevDim() {
+      useDivNumI = useDivNumI == 0 ? divNumList.Length - 1 : useDivNumI - 1;
+      DivNum = divNumList[useDivNumI];
+    }
     public int DivNum {
       get => divNum;
-      set {
+      private set {
         divNum = value;
         UpdateParameter();
         b = new double[size];
       }
     }
-    public double DeltaT {
-      get => deltaT;
-      set {
-        deltaT = value;
-        UpdateParameter();
-      }
-    }
+
     public double[] State => b;
     public double MaxValue => heat;
 

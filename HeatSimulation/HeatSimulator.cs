@@ -9,7 +9,7 @@ namespace HeatSimulation {
     private static readonly int[] divNumList = {5, 10, 50, 100, 150, 200};
 
     private int useDivNumI = 3;
-    private int divNum = 100;
+    private int divNum;
     public double DeltaT { get; } = 1 / 60.0;
 
     private int size, lda, bl;
@@ -20,6 +20,7 @@ namespace HeatSimulation {
     
     public HeatSimulator() {
       alwaysHeatList = new List<int>();
+      divNum = divNumList[useDivNumI];
       UpdateParameter();
       b = new double[size];
       for (var i = 0; i < b.Length; i++) b[i] = heat;
@@ -77,7 +78,7 @@ namespace HeatSimulation {
     public double MaxValue => heat;
 
     public void DoStep() {
-      foreach (var target in alwaysHeatList) b[target] += heat / DeltaT;
+      foreach (var target in alwaysHeatList) b[target] += heat / h;
       pbtrs(LapackLayout.ColumnMajor, LapackUpLo.Lower, size, bl, 1, a, lda, b, size);
     }
     public void PinnedCell(int target) {
@@ -89,7 +90,7 @@ namespace HeatSimulation {
       if (alwaysHeatList.Count > 0) alwaysHeatList.RemoveAt(alwaysHeatList.Count - 1);
     }
     public void AllHeat() {
-      for (var i = 0; i < b.Length; i++) b[i] += heat;
+      for (var i = 0; i < b.Length; i++) b[i] += heat / h;
     }
   }
 }

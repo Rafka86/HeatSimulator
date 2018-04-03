@@ -62,7 +62,7 @@ namespace HeatSimulation {
         Usage             = Usage.RenderTargetOutput
       };
       Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.BgraSupport,
-                                 new[] {FeatureLevel.Level_11_1}, desc, out device, out swapChain);
+                                 new[] {FeatureLevel.Level_12_0, FeatureLevel.Level_11_0}, desc, out device, out swapChain);
       
       factory = swapChain.GetParent<Factory>();
       factory.MakeWindowAssociation(Handle, WindowAssociationFlags.IgnoreAll);
